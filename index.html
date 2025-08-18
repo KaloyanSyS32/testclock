@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Fullscreen Clock with Stars & Themes</title>
+  <title>Fullscreen Clock with Stars & Theme Menu</title>
   <style>
     body {
       margin: 0;
@@ -56,6 +56,23 @@
       left: 20px;
     }
 
+    .theme-menu {
+      position: fixed;
+      top: 60px;
+      left: 20px;
+      display: none;
+      flex-direction: column;
+      background: rgba(0,0,0,0.8);
+      padding: 10px;
+      border-radius: 8px;
+      z-index: 1001;
+    }
+
+    .theme-menu button {
+      margin: 5px 0;
+      background: rgba(255,255,255,0.2);
+    }
+
     .hidden {
       opacity: 0;
       pointer-events: none;
@@ -88,15 +105,16 @@
   <div class="date" id="date">Monday, January 1, 1970</div>
   <button id="fullscreen-btn">Fullscreen</button>
   <button id="theme-btn">Themes</button>
+  <div class="theme-menu" id="theme-menu"></div>
 
   <script>
     const clock = document.getElementById("clock");
     const date = document.getElementById("date");
     const fullscreenBtn = document.getElementById("fullscreen-btn");
     const themeBtn = document.getElementById("theme-btn");
+    const themeMenu = document.getElementById("theme-menu");
     const body = document.body;
     let starsCreated = false;
-    let currentThemeIndex = 0;
 
     // Define themes
     const themes = [
@@ -111,6 +129,17 @@
       body.style.background = theme.bg;
       body.style.color = theme.text;
     }
+
+    // Build theme menu
+    themes.forEach((t, index) => {
+      const btn = document.createElement("button");
+      btn.textContent = t.name;
+      btn.addEventListener("click", () => {
+        applyTheme(t);
+        themeMenu.style.display = "none"; // hide menu after selection
+      });
+      themeMenu.appendChild(btn);
+    });
 
     // Clock + date updater
     function updateClock() {
@@ -130,7 +159,8 @@
     fullscreenBtn.addEventListener("click", () => {
       document.documentElement.requestFullscreen().then(() => {
         fullscreenBtn.classList.add("hidden");
-        themeBtn.classList.add("hidden");
+        themeBtn.classList.add("hidden"); // now hides only on fullscreen
+        themeMenu.style.display = "none";
       });
     });
 
@@ -141,11 +171,9 @@
       }
     });
 
-    // Themes button cycles through themes
+    // Themes button shows/hides menu
     themeBtn.addEventListener("click", () => {
-      currentThemeIndex = (currentThemeIndex + 1) % themes.length;
-      applyTheme(themes[currentThemeIndex]);
-      themeBtn.classList.add("hidden"); // hides after press
+      themeMenu.style.display = themeMenu.style.display === "flex" ? "none" : "flex";
     });
 
     // Night mode + star management
@@ -186,7 +214,7 @@
     }
 
     // Apply default theme initially
-    applyTheme(themes[currentThemeIndex]);
+    applyTheme(themes[0]);
   </script>
 </body>
 </html>
