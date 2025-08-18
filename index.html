@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Fullscreen Clock with Stars & Themes</title>
+  <style>
+    body {
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: #000;
+      color: #fff;
+      font-family: "Segoe UI", sans-serif;
+      overflow: hidden;
+      transition: background 0.6s ease, color 0.6s ease;
+    }
+
+    .clock {
+      font-size: 6rem;
+      font-weight: bold;
+      z-index: 10;
+      position: relative;
+    }
+
+    .date {
+      font-size: 2rem;
+      margin-top: 10px;
+      z-index: 10;
+      position: relative;
+    }
+
+    button {
+      position: fixed;
+      padding: 10px 20px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background: rgba(255,255,255,0.2);
+      color: #fff;
+      backdrop-filter: blur(5px);
+      transition: opacity 0.3s ease;
+      z-index: 1000;
+    }
+
+    #fullscreen-btn {
+      top: 20px;
+      right: 20px;
+    }
+
+    #theme-btn {
+      top: 20px;
+      left: 20px;
+    }
+
+    .hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    body.night {
+      background: #111;
+      color: #888;
+    }
+
+    .star {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: white;
+      border-radius: 50%;
+      opacity: 0.8;
+      animation: drift linear infinite;
+    }
+
+    @keyframes drift {
+      0% { transform: translateY(0) translateX(0); opacity: 0; }
+      10% { opacity: 0.8; }
+      100% { transform: translateY(-200vh) translateX(50vw); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="clock" id="clock">00:00:00</div>
+  <div class="date" id="date">Monday, January 1, 1970</div>
+  <button id="fullscreen-btn">Fullscreen</button>
+  <button id="theme-btn">Themes</button>
+
+  <script>
+    const clock = document.getElementById("clock");
+    const date = document.getElementById("date");
+    const fullscreenBtn = document.getElementById("fullscreen-btn");
+    const themeBtn = document.getElementById("theme-btn");
+    const body = document.body;
+    let starsCreated = false;
+    let currentThemeIndex = 0;
+
+    // Define themes
+    const themes = [
+      { name: "Day", bg: "#000", text: "#fff" },
+      { name: "Night", bg: "#111", text: "#888" },
+      { name: "Amber", bg: "#1a0f00", text: "#ffcc88" },
+      { name: "Cool Blue", bg: "#0a0a2a", text: "#88ccff" },
+      { name: "Soft Purple", bg: "#1a001a", text: "#cc88ff" }
+    ];
+
+    function applyTheme(theme) {
+      body.style.background = theme.bg;
+      body.style.color = theme.text;
+    }
+
+    // Clock + date updater
+    function updateClock() {
+      const now = new Date();
+      clock.textContent = now.toLocaleTimeString("en-GB");
+      date.textContent = now.toLocaleDateString("en-GB", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+      });
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Fullscreen button
+    fullscreenBtn.addEventListener("click", () => {
+      document.documentElement.requestFullscreen().then(() => {
+        fullscreenBtn.classList.add("hidden");
+        themeBtn.classList.add("hidden");
+      });
+    });
+
+    document.addEventListener("fullscreenchange", () => {
+      if (!document.fullscreenElement) {
+        fullscreenBtn.classList.remove("hidden");
+        themeBtn.classList.remove("hidden");
+      }
+    });
+
+    // Themes button cycles through themes
+    themeBtn.addEventListener("click", () => {
+      currentThemeIndex = (currentThemeIndex + 1) % themes.length;
+      applyTheme(themes[currentThemeIndex]);
+      themeBtn.classList.add("hidden"); // hides after press
+    });
+
+    // Night mode + star management
+    function updateThemeAndStars() {
+      const now = new Date();
+      const hour = now.getHours();
+
+      // Night mode from 20:00 to 07:00
+      body.classList.toggle("night", hour >= 20 || hour < 7);
+
+      // Stars appear 21:00 → 06:00
+      if (hour >= 21 || hour < 6) {
+        if (!starsCreated) createStars();
+      } else {
+        removeStars();
+      }
+    }
+
+    setInterval(updateThemeAndStars, 60000);
+    updateThemeAndStars();
+
+    function createStars() {
+      starsCreated = true;
+      for (let i = 0; i < 50; i++) {
+        const star = document.createElement("div");
+        star.classList.add("star");
+        star.style.left = Math.random() * 100 + "vw";
+        star.style.top = Math.random() * 100 + "vh";
+        star.style.animationDuration = 5 + Math.random() * 10 + "s";
+        body.appendChild(star);
+      }
+    }
+
+    function removeStars() {
+      starsCreated = false;
+      const stars = document.querySelectorAll(".star");
+      stars.forEach(star => star.remove());
+    }
+
+    // Apply default theme initially
+    applyTheme(themes[currentThemeIndex]);
+  </script>
+</body>
+</html>
