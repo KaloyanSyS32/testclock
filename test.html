@@ -5,51 +5,51 @@
 <title>Pad Clock</title>
 <style>
   body {
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background: #000;
-    color: #fff;
-    font-family: "Segoe UI", sans-serif;
-    overflow: hidden;
-    transition: background 0.6s, color 0.6s;
+    margin:0;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    background:#000;
+    color:#fff;
+    font-family:"Segoe UI",sans-serif;
+    overflow:hidden;
+    transition:background 0.6s,color 0.6s;
   }
-  .clock { font-size: 6rem; font-weight: bold; z-index:10; }
-  .date { font-size: 2rem; margin-top:10px; z-index:10; }
+  .clock { font-size:6rem; font-weight:bold; z-index:10; }
+  .date { font-size:2rem; margin-top:10px; z-index:10; }
   button {
-    position: fixed;
-    padding: 10px 20px;
-    font-size: 1rem;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    background: rgba(255,255,255,0.2);
-    color: #fff;
-    backdrop-filter: blur(5px);
+    position:fixed;
+    padding:10px 20px;
+    font-size:1rem;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    background:rgba(255,255,255,0.2);
+    color:#fff;
+    backdrop-filter:blur(5px);
     z-index:1000;
   }
-  #fullscreen-btn { top: 20px; right: 20px; }
-  #theme-btn { top: 20px; left: 20px; }
+  #fullscreen-btn { top:20px; right:20px; }
+  #theme-btn { top:20px; left:20px; }
   .theme-menu {
-    position: fixed;
-    top: 60px;
-    left: 20px;
-    display: flex;
-    flex-direction: column;
-    background: rgba(0,0,0,0.7);
-    padding: 10px;
-    border-radius: 8px;
-    z-index: 1001;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.4s;
+    position:fixed;
+    top:60px;
+    left:20px;
+    display:flex;
+    flex-direction:column;
+    background:rgba(0,0,0,0.7);
+    padding:10px;
+    border-radius:8px;
+    z-index:1001;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity 0.4s;
   }
   .theme-menu.show { opacity:1; pointer-events:auto; }
-  .theme-menu button { margin:5px 0; background: rgba(255,255,255,0.2); transition: background 0.3s; }
-  .theme-menu button:hover { background: rgba(255,255,255,0.4); }
+  .theme-menu button { margin:5px 0; background:rgba(255,255,255,0.2); transition:background 0.3s; }
+  .theme-menu button:hover { background:rgba(255,255,255,0.4); }
   .hidden { opacity:0; pointer-events:none; }
   body.night { background:#111; color:#888; }
   .star {
@@ -60,11 +60,11 @@
 </style>
 </head>
 <body>
-<div class="clock" id="clock">00:00:00</div>
-<div class="date" id="date">Monday, January 1, 1970</div>
-<button id="fullscreen-btn">Fullscreen</button>
-<button id="theme-btn">Themes</button>
-<div class="theme-menu" id="theme-menu"></div>
+  <div class="clock" id="clock">00:00:00</div>
+  <div class="date" id="date">Monday, January 1, 1970</div>
+  <button id="fullscreen-btn">Fullscreen</button>
+  <button id="theme-btn">Themes</button>
+  <div class="theme-menu" id="theme-menu"></div>
 
 <script>
 const clock=document.getElementById("clock");
@@ -75,6 +75,7 @@ const themeMenu=document.getElementById("theme-menu");
 const body=document.body;
 let starsCreated=false;
 
+// Themes
 const themes=[
   {name:"Day", bg:"#000", text:"#fff"},
   {name:"Night", bg:"#111", text:"#888"},
@@ -83,10 +84,7 @@ const themes=[
   {name:"Soft Purple", bg:"#1a001a", text:"#cc88ff"}
 ];
 
-function applyTheme(theme){
-  body.style.background=theme.bg;
-  body.style.color=theme.text;
-}
+function applyTheme(theme){body.style.background=theme.bg;body.style.color=theme.text;}
 
 // Build theme menu
 themes.forEach(t=>{
@@ -124,18 +122,14 @@ document.addEventListener("fullscreenchange",()=>{
 });
 
 // Theme menu toggle
-themeBtn.addEventListener("click",()=>{
-  themeMenu.classList.toggle("show");
-});
+themeBtn.addEventListener("click",()=>{themeMenu.classList.toggle("show");});
 
 // Night mode + stars
 function updateThemeAndStars(){
   const now=new Date();
   const hour=now.getHours();
-  body.classList.toggle("night", hour>=20||hour<7);
-  if(hour>=21||hour<6){
-    if(!starsCreated) createStars();
-  } else removeStars();
+  body.classList.toggle("night",hour>=20||hour<7);
+  if(hour>=21||hour<6){if(!starsCreated) createStars();}else removeStars();
 }
 setInterval(updateThemeAndStars,60000);
 updateThemeAndStars();
@@ -151,10 +145,7 @@ function createStars(){
     body.appendChild(star);
   }
 }
-function removeStars(){
-  starsCreated=false;
-  document.querySelectorAll(".star").forEach(s=>s.remove());
-}
+function removeStars(){starsCreated=false;document.querySelectorAll(".star").forEach(s=>s.remove());}
 
 // Default theme
 applyTheme(themes[0]);
