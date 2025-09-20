@@ -8,14 +8,15 @@
     margin: 0;
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
+    justify-content: flex-start; /* clock at top */
     height: 100vh;
     background: #000;
     color: #fff;
     font-family: "Segoe UI", sans-serif;
     overflow: hidden;
     transition: background 0.6s, color 0.6s;
+    padding-top: 40px; /* spacing from top */
   }
 
   .clock { font-size: 6rem; font-weight: bold; }
@@ -61,22 +62,33 @@
     10% { opacity: 0.8; }
     100% { transform: translateY(-200vh) translateX(50vw); opacity: 0; }
   }
+
+  /* Mobile scaling */
+  @media (max-width: 600px) {
+    .clock { font-size: 4rem; }
+    .date { font-size: 1.2rem; }
+    #fullscreen-btn, .control-btn, input[type="time"] { 
+      padding: 6px 12px; 
+      font-size: 0.9rem; 
+    }
+    .controls { gap: 5px; }
+  }
 </style>
 </head>
 <body>
-<div class="clock" id="clock">00:00:00</div>
-<div class="date" id="date">Monday, January 1, 1970</div>
+  <div class="clock" id="clock">00:00:00</div>
+  <div class="date" id="date">Monday, January 1, 1970</div>
 
-<div class="controls" id="controls">
-  <button id="fullscreen-btn">Fullscreen</button>
-  <div>
-    <label>Stars: <input type="range" id="star-density" min="10" max="100" value="50"></label>
+  <div class="controls" id="controls">
+    <button id="fullscreen-btn">Fullscreen</button>
+    <div>
+      <label>Stars: <input type="range" id="star-density" min="10" max="100" value="50"></label>
+    </div>
+    <div>
+      <input type="time" id="alarm-time">
+      <button class="control-btn" id="set-alarm">Set Alarm</button>
+    </div>
   </div>
-  <div>
-    <input type="time" id="alarm-time">
-    <button class="control-btn" id="set-alarm">Set Alarm</button>
-  </div>
-</div>
 
 <script>
 const clock = document.getElementById("clock");
