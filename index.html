@@ -1,233 +1,150 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Fullscreen Clock with Stars & Theme Menu</title>
-  <style>
-    body {
-      margin: 0;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      background: #000;
-      color: #fff;
-      font-family: "Segoe UI", sans-serif;
-      overflow: hidden;
-      transition: background 0.6s ease, color 0.6s ease;
-    }
+<meta charset="UTF-8">
+<title>Desk Clock Pro</title>
+<style>
+  body {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: #000;
+    color: #fff;
+    font-family: "Segoe UI", sans-serif;
+    overflow: hidden;
+    transition: background 0.6s, color 0.6s;
+  }
 
-    .clock {
-      font-size: 6rem;
-      font-weight: bold;
-      z-index: 10;
-      position: relative;
-    }
+  .clock { font-size: 6rem; font-weight: bold; }
+  .date { font-size: 2rem; margin-top: 10px; }
+  #fullscreen-btn, .control-btn {
+    margin-top: 10px;
+    padding: 10px 20px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+    backdrop-filter: blur(5px);
+  }
 
-    .date {
-      font-size: 2rem;
-      margin-top: 10px;
-      z-index: 10;
-      position: relative;
-    }
+  body.night { background: #111; color: #888; }
 
-    button {
-      position: fixed;
-      padding: 10px 20px;
-      font-size: 1rem;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      background: rgba(255,255,255,0.2);
-      color: #fff;
-      backdrop-filter: blur(5px);
-      transition: opacity 0.3s ease;
-      z-index: 1000;
-    }
+  .star {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: white;
+    border-radius: 50%;
+    opacity: 0.8;
+    animation: drift linear infinite;
+  }
 
-    #fullscreen-btn {
-      top: 20px;
-      right: 20px;
-    }
-
-    #theme-btn {
-      top: 20px;
-      left: 20px;
-    }
-
-    .theme-menu {
-      position: fixed;
-      top: 60px;
-      left: 20px;
-      display: flex;
-      flex-direction: column;
-      background: rgba(0,0,0,0.7);
-      padding: 10px;
-      border-radius: 8px;
-      z-index: 1001;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.4s ease;
-    }
-
-    .theme-menu.show {
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    .theme-menu button {
-      margin: 5px 0;
-      background: rgba(255,255,255,0.2);
-      transition: background 0.3s ease;
-    }
-
-    .theme-menu button:hover {
-      background: rgba(255,255,255,0.4);
-    }
-
-    .hidden {
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    body.night {
-      background: #111;
-      color: #888;
-    }
-
-    .star {
-      position: absolute;
-      width: 2px;
-      height: 2px;
-      background: white;
-      border-radius: 50%;
-      opacity: 0.8;
-      animation: drift linear infinite;
-    }
-
-    @keyframes drift {
-      0% { transform: translateY(0) translateX(0); opacity: 0; }
-      10% { opacity: 0.8; }
-      100% { transform: translateY(-200vh) translateX(50vw); opacity: 0; }
-    }
-  </style>
+  @keyframes drift {
+    0% { transform: translateY(0) translateX(0); opacity: 0; }
+    10% { opacity: 0.8; }
+    100% { transform: translateY(-200vh) translateX(50vw); opacity: 0; }
+  }
+</style>
 </head>
 <body>
-  <div class="clock" id="clock">00:00:00</div>
-  <div class="date" id="date">Monday, January 1, 1970</div>
-  <button id="fullscreen-btn">Fullscreen</button>
-  <button id="theme-btn">Themes</button>
-  <div class="theme-menu" id="theme-menu"></div>
+<div class="clock" id="clock">00:00:00</div>
+<div class="date" id="date">Monday, January 1, 1970</div>
 
-  <script>
-    const clock = document.getElementById("clock");
-    const date = document.getElementById("date");
-    const fullscreenBtn = document.getElementById("fullscreen-btn");
-    const themeBtn = document.getElementById("theme-btn");
-    const themeMenu = document.getElementById("theme-menu");
-    const body = document.body;
-    let starsCreated = false;
+<!-- Controls -->
+<button id="fullscreen-btn">Fullscreen</button>
+<div style="margin-top:15px;">
+  <button class="control-btn" id="day-theme">Day</button>
+  <button class="control-btn" id="night-theme">Night</button>
+</div>
+<div style="margin-top:10px;">
+  <label>Stars: <input type="range" id="star-density" min="10" max="100" value="50"></label>
+</div>
+<div style="margin-top:10px;">
+  <input type="time" id="alarm-time">
+  <button class="control-btn" id="set-alarm">Set Alarm</button>
+</div>
 
-    // Define themes
-    const themes = [
-      { name: "Day", bg: "#000", text: "#fff" },
-      { name: "Night", bg: "#111", text: "#888" },
-      { name: "Amber", bg: "#1a0f00", text: "#ffcc88" },
-      { name: "Cool Blue", bg: "#0a0a2a", text: "#88ccff" },
-      { name: "Soft Purple", bg: "#1a001a", text: "#cc88ff" }
-    ];
+<script>
+const clock = document.getElementById("clock");
+const dateEl = document.getElementById("date");
+const body = document.body;
+const fullscreenBtn = document.getElementById("fullscreen-btn");
+let starsCreated = false;
+let starElements = [];
+let alarmTime = null;
 
-    function applyTheme(theme) {
-      body.style.background = theme.bg;
-      body.style.color = theme.text;
-    }
+// Clock + date
+function updateClock() {
+  const now = new Date();
+  clock.textContent = now.toLocaleTimeString("en-GB");
+  dateEl.textContent = now.toLocaleDateString("en-GB", {weekday:"long", year:"numeric", month:"long", day:"numeric"});
+  checkAlarm(now);
+}
+setInterval(updateClock, 1000);
+updateClock();
 
-    // Build theme menu
-    themes.forEach((t) => {
-      const btn = document.createElement("button");
-      btn.textContent = t.name;
-      btn.addEventListener("click", () => {
-        applyTheme(t);
-        themeMenu.classList.remove("show"); // hide menu after selection
-      });
-      themeMenu.appendChild(btn);
-    });
+// Fullscreen
+fullscreenBtn.addEventListener("click", () => {
+  document.documentElement.requestFullscreen().then(()=>{fullscreenBtn.style.display='none';});
+});
+document.addEventListener("fullscreenchange", ()=>{if(!document.fullscreenElement) fullscreenBtn.style.display='block';});
 
-    // Clock + date updater
-    function updateClock() {
-      const now = new Date();
-      clock.textContent = now.toLocaleTimeString("en-GB");
-      date.textContent = now.toLocaleDateString("en-GB", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric"
-      });
-    }
-    setInterval(updateClock, 1000);
-    updateClock();
+// Theme buttons
+document.getElementById("day-theme").addEventListener("click", ()=>body.classList.remove("night"));
+document.getElementById("night-theme").addEventListener("click", ()=>body.classList.add("night"));
 
-    // Fullscreen button
-    fullscreenBtn.addEventListener("click", () => {
-      document.documentElement.requestFullscreen().then(() => {
-        fullscreenBtn.classList.add("hidden");
-        themeBtn.classList.add("hidden"); // hide theme button too
-        themeMenu.classList.remove("show"); // hide menu
-      });
-    });
+// Alarm
+document.getElementById("set-alarm").addEventListener("click", ()=>{
+  alarmTime = document.getElementById("alarm-time").value;
+  if(alarmTime) alert("Alarm set for " + alarmTime);
+});
+function checkAlarm(now){
+  if(!alarmTime) return;
+  const [h,m] = alarmTime.split(":").map(Number);
+  if(now.getHours()===h && now.getMinutes()===m && now.getSeconds()===0){
+    alert("⏰ Alarm!");
+    alarmTime=null;
+  }
+}
 
-    document.addEventListener("fullscreenchange", () => {
-      if (!document.fullscreenElement) {
-        fullscreenBtn.classList.remove("hidden");
-        themeBtn.classList.remove("hidden");
-      }
-    });
+// Stars management
+const starRange = document.getElementById("star-density");
+function updateStars(){
+  const now = new Date();
+  const hour = now.getHours();
+  const desiredCount = parseInt(starRange.value);
 
-    // Themes button shows/hides menu with fade
-    themeBtn.addEventListener("click", () => {
-      themeMenu.classList.toggle("show");
-    });
-
-    // Night mode + star management
-    function updateThemeAndStars() {
-      const now = new Date();
-      const hour = now.getHours();
-
-      // Night mode from 20:00 to 07:00
-      body.classList.toggle("night", hour >= 20 || hour < 7);
-
-      // Stars appear 21:00 → 06:00
-      if (hour >= 21 || hour < 6) {
-        if (!starsCreated) createStars();
-      } else {
-        removeStars();
-      }
-    }
-
-    setInterval(updateThemeAndStars, 60000);
-    updateThemeAndStars();
-
-    function createStars() {
-      starsCreated = true;
-      for (let i = 0; i < 50; i++) {
+  if(hour>=21 || hour<6){
+    if(starElements.length < desiredCount){
+      const toAdd = desiredCount - starElements.length;
+      for(let i=0;i<toAdd;i++){
         const star = document.createElement("div");
         star.classList.add("star");
-        star.style.left = Math.random() * 100 + "vw";
-        star.style.top = Math.random() * 100 + "vh";
-        star.style.animationDuration = 5 + Math.random() * 10 + "s";
+        star.style.left = Math.random()*100+"vw";
+        star.style.top = Math.random()*100+"vh";
+        star.style.animationDuration = 5 + Math.random()*10 +"s";
         body.appendChild(star);
+        starElements.push(star);
+      }
+    } else if(starElements.length>desiredCount){
+      const removeCount = starElements.length - desiredCount;
+      for(let i=0;i<removeCount;i++){
+        const star = starElements.pop();
+        star.remove();
       }
     }
-
-    function removeStars() {
-      starsCreated = false;
-      const stars = document.querySelectorAll(".star");
-      stars.forEach(star => star.remove());
-    }
-
-    // Apply default theme initially
-    applyTheme(themes[0]);
-  </script>
+  } else {
+    starElements.forEach(s=>s.remove());
+    starElements=[];
+  }
+}
+setInterval(updateStars, 1000);
+updateStars();
+</script>
 </body>
 </html>
